@@ -9,6 +9,10 @@ const (
 	VERSION     = "0.1"
 	FOLDER_NAME = ".quickchat"
 )
+//PORTS
+const (
+	LISTEN_PORT = "8489"
+)
 
 func UserEnvVar() string {
 	if syscall.OS == "windows" {

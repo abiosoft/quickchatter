@@ -3,14 +3,16 @@ package manager
 import (
 	"net"
 	"quickchat/database"	
+	"quickchat/util"
+	"log"
 )
 
 type Server struct{
-	Server *net.Listener
-	Friends map[String]*database.Friend
+	Server net.PacketConn
+	Friends map[string]*database.Friend
 }
 
-var Server *Server
+var LocalServer *Server
 
 func (this *Server) addFriend(friend *database.Friend){
 	_, ok := this.Friends[friend.Name]
@@ -25,7 +27,11 @@ func (this *Server) deleteFriend(friend *database.Friend){
 }
 
 func init(){
-	Sever = &Server{
-		Server : 
+	l, err := net.ListenPacket("udp", ":"+util.LISTEN_PORT)
+	if err != nil{
+		log.Exit(err)
 	}
+	LocalServer = &Server{
+		Server : l,
+		Friends : make(map[string]*database.Friend) }
 }
