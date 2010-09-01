@@ -9,14 +9,23 @@ import proto "goprotobuf.googlecode.com/hg/proto"
 var _ = proto.GetString
 
 type SettingsWire struct {
-	ProfileName      *string "PB(bytes,1,req,name=profile_name)"
-	Password         *string "PB(bytes,2,req,name=password)"
-	Friends          []byte  "PB(bytes,3,req,name=friends)"
-	XXX_unrecognized []byte
+	ProfileName	*string	"PB(bytes,1,req,name=profile_name)"
+	Password	*string	"PB(bytes,2,req,name=password)"
+	Friends	[]byte	"PB(bytes,3,req,name=friends)"
+	XXX_unrecognized	[]byte
 }
-
 func (this *SettingsWire) Reset() {
 	*this = SettingsWire{}
+}
+
+type Sync struct {
+	Hostname	*string	"PB(bytes,1,req,name=hostname)"
+	Port	*int32	"PB(varint,2,req,name=port)"
+	TempHashKey	*string	"PB(bytes,3,req,name=temp_hash_key)"
+	XXX_unrecognized	[]byte
+}
+func (this *Sync) Reset() {
+	*this = Sync{}
 }
 
 func init() {

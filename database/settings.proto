@@ -5,3 +5,9 @@ message SettingsWire {
   required string password = 2;
   required bytes friends = 3;
 }
+
+message Sync {
+	required string hostname = 1;
+	required int32 port = 2;
+	required string temp_hash_key = 3;
+}

@@ -22,25 +22,26 @@ var (
 	Me          *database.Friend
 )
 
-func (this *Server) addFriend(friend *database.Friend) {
+func (this *Server) AddFriend(friend *database.Friend) bool {
 	_, ok := this.Friends[friend.Name]
 	if ok {
-		return
+		return false
 	}
 	this.Friends[friend.Name] = friend
+	return true
 }
 
-func (this *Server) deleteFriend(friend *database.Friend) {
+func (this *Server) DeleteFriend(friend *database.Friend) {
 	this.Friends[friend.Name] = nil
 }
 
-func (this *Server) send(conn Conn, friend *database.Friend) {
+func (this *Server) Send(conn Conn, friend *database.Friend) {
 	c := make(chan Conn)
 	LocalServer.Sender.Export(friend.Hostname, c, netchan.Send)
 	c <- conn
 }
 
-func init() {
+func Init() {
 	l, err := net.ListenPacket("udp", ":"+util.LISTEN_PORT)
 	if err != nil {
 		log.Exit(err)
