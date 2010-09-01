@@ -15,6 +15,10 @@ const (
 	SECRET_KEY_SIZE = 32
 )
 
+const (
+	BCAST_INTERVAL = 5e8
+)
+
 func UserEnvVar() string {
 	if syscall.OS == "windows" {
 		return "USERPROFILE"

@@ -9,6 +9,8 @@ import (
 	"strings"
 	"netchan"
 	"strconv"
+	proto "goprotobuf.googlecode.com/hg/proto"
+	"os"
 )
 
 type Server struct {
@@ -41,7 +43,34 @@ func (this *Server) Send(conn Conn, friend *database.Friend) {
 	c <- conn
 }
 
-func Init() {
+func StartBroadcast() {
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Exit(err)
+	}
+	sync := &database.Sync{
+		Hostname:    proto.String(hostname),
+		Port:        proto.Int(Me.SenderPort),
+		TempHashKey: proto.String(Me.TempHashKey)}
+	data, err := proto.Marshal(sync)
+	if err != nil {
+		log.Exit(err)
+	}
+	bAddr, err := GetBroadcastAddr()
+	if err != nil {
+		log.Exit(err)
+	}
+	add, err := net.ResolveUDPAddr(bAddr + ":" + util.LISTEN_PORT)
+	if err != nil {
+		log.Exit(err)
+	}
+	_, err = LocalServer.Server.WriteTo(data, add)
+	if err != nil {
+		log.Exit(err)
+	}
+}
+
+func init() {
 	l, err := net.ListenPacket("udp", ":"+util.LISTEN_PORT)
 	if err != nil {
 		log.Exit(err)

@@ -9,7 +9,7 @@ import (
 	"net"
 )
 
-func GetBroadcastAddr() (add string, err os.Error){
+func GetBroadcastAddr() (add string, err os.Error) {
 	hostname, err := os.Hostname()
 	if err != nil {
 		return
@@ -17,7 +17,9 @@ func GetBroadcastAddr() (add string, err os.Error){
 	if syscall.OS == "windows" {
 		//LookupHost(name string) (cname string, addrs []string, err os.Error)
 		_, addrs, err := net.LookupHost(hostname)
-		if err != nil{ return }
+		if err != nil {
+			return
+		}
 		for _, a := range addrs {
 			if len(strings.Split(a, ".", -1)) == 4 {
 				add = a
