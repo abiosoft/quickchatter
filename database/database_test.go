@@ -2,15 +2,16 @@ package database
 
 import (
 	"testing"
-	"container/vector"
 	"quickchat/crypt"
 )
 
 func TestProfile(t *testing.T) {
-	var frnds = &vector.Vector{}
-	vals := [][]string{[]string{"good", "boy"}, []string{"boy", "good"}}
-	frnds.Push(&Friend{"good", "boy", "", ""})
-	frnds.Push(&Friend{"boy", "good", "", ""})
+	var frnds = make(map[string]*Friend)
+	vals := make(map[string][]string)
+	vals["good"] = []string{"good", "boy"}
+	vals["boy"] = []string{"boy", "good"}
+	frnds["good"] = &Friend{"good", "boy", "", "", nil, 0}
+	frnds["boy"] = &Friend{"boy", "good", "", "", nil, 0}
 	set := &Settings{ProfileName: "testprofile", Friends: frnds, Password: crypt.Md5([]byte("store"))}
 	err := SaveSettings(set)
 	if err != nil {
@@ -25,9 +26,9 @@ func TestProfile(t *testing.T) {
 	if s.ProfileName != set.ProfileName || s.Password != set.Password {
 		t.Fail()
 	}
-	for i, v := range *s.Friends {
-		f, ok := v.(*Friend)
-		if !ok || f.Name != vals[i][0] || f.Hostname != vals[i][1] {
+	for i, f := range s.Friends {
+		if f.Name != vals[i][0] || f.Hostname != vals[i][1] {
+			println(f.Name, f.Hostname, vals[i][0], vals[i][1])
 			t.Fail()
 		}
 	}

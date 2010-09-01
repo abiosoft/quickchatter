@@ -11,7 +11,8 @@ const (
 )
 //PORTS
 const (
-	LISTEN_PORT = "8489"
+	LISTEN_PORT     = "8489"
+	SECRET_KEY_SIZE = 32
 )
 
 func UserEnvVar() string {

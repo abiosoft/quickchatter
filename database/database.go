@@ -2,12 +2,12 @@ package database
 
 import (
 	"os"
-	"container/vector"
 	"quickchat/util"
 	"path"
 	proto "goprotobuf.googlecode.com/hg/proto"
 	"io/ioutil"
 	"strings"
+	"netchan"
 )
 
 var (
@@ -21,37 +21,35 @@ type Friend struct {
 	Hostname    string
 	TempHashKey string
 	AsyncMsg    string
+	Receiver    *netchan.Importer
+	SenderPort  int
 }
 
 type Settings struct {
 	ProfileName string
-	Friends     *vector.Vector
+	Friends     map[string]*Friend
 	Password    string
 }
 
-func serializeFriends(friends *vector.Vector) []byte {
+func serializeFriends(friends map[string]*Friend) []byte {
 	serial := ""
 	fSep := "<<<<>>>>"
 	vSep := "{{{}}}"
 	if friends == nil {
 		return make([]byte, 0)
 	}
-	for _, v := range *friends {
-		f, ok := v.(*Friend)
-		if !ok {
-			continue
-		}
+	for _, f := range friends {
 		serial += f.Name + vSep + f.Hostname + fSep
 	}
 	return []byte(serial)
 }
 
-func unserializeFriends(data []byte) (friends *vector.Vector) {
+func unserializeFriends(data []byte) (friends map[string]*Friend) {
 	str := string(data)
 	fSep := "<<<<>>>>"
 	vSep := "{{{}}}"
 	frnds := strings.Split(str, fSep, -1)
-	friends = &vector.Vector{}
+	friends = make(map[string]*Friend)
 	for _, f := range frnds {
 		frnd := strings.Split(f, vSep, -1)
 		if len(frnd) != 2 {
@@ -60,7 +58,7 @@ func unserializeFriends(data []byte) (friends *vector.Vector) {
 		if frnd[0] == "" || frnd[1] == "" {
 			continue
 		}
-		friends.Push(&Friend{Name: frnd[0], Hostname: frnd[1]})
+		friends[frnd[0]] = &Friend{Name: frnd[0], Hostname: frnd[1]}
 	}
 	return
 }

@@ -14,12 +14,14 @@ const (
 
 var Settings *database.Settings
 
+type FromFriend struct {
+	Name     string
+	Hostname string
+}
+
 type Conn struct {
 	Type    int
 	HashKey string
 	Data    interface{}
-}
-
-type Message struct {
-	Msg string
+	Friend  *FromFriend
 }
