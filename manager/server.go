@@ -11,6 +11,8 @@ import (
 	"strconv"
 	proto "goprotobuf.googlecode.com/hg/proto"
 	"os"
+	"time"
+	"fmt"
 )
 
 type Server struct {
@@ -49,6 +51,7 @@ func StartBroadcast() {
 		log.Exit(err)
 	}
 	sync := &database.Sync{
+		Name:	proto.String(Me.Name)
 		Hostname:    proto.String(hostname),
 		Port:        proto.Int(Me.SenderPort),
 		TempHashKey: proto.String(Me.TempHashKey)}
@@ -64,9 +67,40 @@ func StartBroadcast() {
 	if err != nil {
 		log.Exit(err)
 	}
-	_, err = LocalServer.Server.WriteTo(data, add)
-	if err != nil {
-		log.Exit(err)
+	for {
+		_, err = LocalServer.Server.WriteTo(data, add)
+		if err != nil {
+			log.Stderr(err)
+		}
+		time.Sleep(util.BCAST_INTERVAL)
+	}
+}
+
+func StartListener(){
+	for {
+		data := make([]byte, util.BUFFER_SIZE)
+		n, _, err := LocalServer.Server.ReadFrom(data)
+		if err != nil {
+			log.Exit(err)
+		}
+		sync := &database.Sync{}
+		err = proto.Unmarshal(data, sync)
+		if err != nil {
+			log.Exit(err)
+		}
+		frnd := &database.Friend{
+			Name : proto.GetString(sync.Name)
+			Hostname : proto.GetString(sync.Hostname)
+			SenderPort : proto.GetInt(sync.Port)
+			TempHashKey : proto.GetString(Me.TempHashKey)
+		}
+		imp, err := netchan.NewImporter("tcp", frnd.Hostname+":"+fmt.Sprint(frnd.SenderPort))
+		if err != nil { log.Stderr(err) }
+		frnd.Receiver = imp
+		if !AddFriend(frnd) {
+			log.Stderr("Connection failed")
+		}
+		time.Sleep(util.BCAST_INTERVAL)
 	}
 }
 
