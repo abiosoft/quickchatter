@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cd crypt && gofmt -w *.go && cd ../database && gofmt -w *.go && cd ../manager && gofmt -w *.go && cd ../util && gofmt -w *.go
