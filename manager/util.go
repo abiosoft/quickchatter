@@ -9,6 +9,13 @@ import (
 	"net"
 )
 
+const (
+	MESSAGE = iota
+	ASYNC_MESSAGE
+	GOING_OFFLINE
+	FILE_TRANSFER
+)
+
 func GetBroadcastAddr() (add string, err os.Error) {
 	hostname, err := os.Hostname()
 	if err != nil {

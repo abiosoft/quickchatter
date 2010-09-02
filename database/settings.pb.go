@@ -20,9 +20,10 @@ func (this *SettingsWire) Reset() {
 }
 
 type Sync struct {
-	Hostname         *string "PB(bytes,1,req,name=hostname)"
-	Port             *int32  "PB(varint,2,req,name=port)"
-	TempHashKey      *string "PB(bytes,3,req,name=temp_hash_key)"
+	Name             *string "PB(bytes,1,req,name=name)"
+	Hostname         *string "PB(bytes,2,req,name=hostname)"
+	Port             *int32  "PB(varint,3,req,name=port)"
+	TempHashKey      *string "PB(bytes,4,req,name=temp_hash_key)"
 	XXX_unrecognized []byte
 }
 

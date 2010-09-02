@@ -21,6 +21,13 @@ func GenerateKey(l int) (key []byte) {
 	return
 }
 
+func GenerateNums(l int) (num string) {
+	for i := 0; i < l; i++ {
+		num += fmt.Sprint(int(uint8(rand.Intn(256))))
+	}
+	return num
+}
+
 func Encrypt(key, b []byte) {
 	c, err := aes.NewCipher(key)
 	if err != nil {

@@ -15,16 +15,19 @@ import (
 	"fmt"
 )
 
-type Server struct {
-	Server  net.PacketConn
-	Friends map[string]*database.Friend
-	Sender  *netchan.Exporter
-}
-
 var (
 	LocalServer *Server
 	Me          *database.Friend
 )
+
+type Server struct {
+	Server        net.PacketConn
+	Friends       map[string]*database.Friend
+	Sender        *netchan.Exporter
+	Messages      map[string]string
+	AsyncMessages map[string]string
+	ReceivedFiles map[string]string
+}
 
 func (this *Server) AddFriend(friend *database.Friend) bool {
 	_, ok := this.Friends[friend.Name]
@@ -35,14 +38,67 @@ func (this *Server) AddFriend(friend *database.Friend) bool {
 	return true
 }
 
-func (this *Server) DeleteFriend(friend *database.Friend) {
-	this.Friends[friend.Name] = nil
+func (this *Server) HasFriend(name string) bool {
+	_, ok := this.Friends[name]
+	return ok
 }
 
-func (this *Server) Send(conn Conn, friend *database.Friend) {
-	c := make(chan Conn)
+func (this *Server) DeleteFriend(name string) {
+	this.Friends[name] = nil
+}
+
+func (this *Server) Send(conn *Conn, friend *database.Friend) {
+	c := make(chan *Conn)
 	LocalServer.Sender.Export(friend.Hostname, c, netchan.Send)
 	c <- conn
+}
+
+func ListenToFriend(frnd *database.Friend) {
+	c := make(chan *Conn)
+	err := frnd.Receiver.Import(frnd.Name, c, netchan.Recv)
+	if err != nil {
+		log.Stderr(err)
+		LocalServer.DeleteFriend(frnd.Name)
+	}
+	for {
+		if closed(c) {
+			break
+		}
+		conn := <-c
+		if conn == nil {
+			break
+		}
+		ReceiveAndProcess(conn)
+	}
+}
+
+func ReceiveAndProcess(c *Conn) {
+	from := c.Friend
+	if !LocalServer.HasFriend(from.Name) {
+		log.Stdout("connection refused from", from.Name, "at", from.Hostname)
+	}
+	switch c.Type {
+	case MESSAGE:
+		{
+			LocalServer.Messages[from.Name] = c.Data
+			break
+		}
+	case ASYNC_MESSAGE:
+		{
+			LocalServer.AsyncMessages[from.Name] = c.Data
+			break
+		}
+	case GOING_OFFLINE:
+		{
+			LocalServer.DeleteFriend(from.Name)
+			break
+		}
+	case FILE_TRANSFER:
+		{
+			LocalServer.ReceivedFiles[from.Name] = c.Data
+			break
+		}
+	}
 }
 
 func StartBroadcast() {
@@ -51,7 +107,7 @@ func StartBroadcast() {
 		log.Exit(err)
 	}
 	sync := &database.Sync{
-		Name:	proto.String(Me.Name)
+		Name:        proto.String(Me.Name),
 		Hostname:    proto.String(hostname),
 		Port:        proto.Int(Me.SenderPort),
 		TempHashKey: proto.String(Me.TempHashKey)}
@@ -76,10 +132,11 @@ func StartBroadcast() {
 	}
 }
 
-func StartListener(){
+func StartListener() {
 	for {
+		time.Sleep(util.BCAST_INTERVAL)
 		data := make([]byte, util.BUFFER_SIZE)
-		n, _, err := LocalServer.Server.ReadFrom(data)
+		_, _, err := LocalServer.Server.ReadFrom(data)
 		if err != nil {
 			log.Exit(err)
 		}
@@ -89,18 +146,19 @@ func StartListener(){
 			log.Exit(err)
 		}
 		frnd := &database.Friend{
-			Name : proto.GetString(sync.Name)
-			Hostname : proto.GetString(sync.Hostname)
-			SenderPort : proto.GetInt(sync.Port)
-			TempHashKey : proto.GetString(Me.TempHashKey)
-		}
+			Name:        proto.GetString(sync.Name),
+			Hostname:    proto.GetString(sync.Hostname),
+			SenderPort:  int(proto.GetInt32(sync.Port)),
+			TempHashKey: Me.TempHashKey}
 		imp, err := netchan.NewImporter("tcp", frnd.Hostname+":"+fmt.Sprint(frnd.SenderPort))
-		if err != nil { log.Stderr(err) }
+		if err != nil {
+			log.Stderr(err)
+			continue
+		}
 		frnd.Receiver = imp
-		if !AddFriend(frnd) {
+		if !LocalServer.AddFriend(frnd) {
 			log.Stderr("Connection failed")
 		}
-		time.Sleep(util.BCAST_INTERVAL)
 	}
 }
 
@@ -118,7 +176,7 @@ func init() {
 	}
 	sAdd := LocalServer.Sender.Addr().String()
 	sPort, err := strconv.Atoi(sAdd[strings.LastIndex(sAdd, ":"):])
-	if strings.LastIndex(sAdd, ":") == -1 {
+	if strings.LastIndex(sAdd, ":") == -1 || err != nil {
 		log.Exit("address binding failure")
 	}
 	Me = &database.Friend{

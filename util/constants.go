@@ -13,12 +13,12 @@ const (
 const (
 	LISTEN_PORT     = "8489"
 	SECRET_KEY_SIZE = 32
-	BUFFER_SIZE = 32
+	BUFFER_SIZE     = 32
 )
 
 const (
 	BCAST_INTERVAL = 5e8
-	GOMAXPROCS = 100
+	GOMAXPROCS     = 100
 )
 
 func UserEnvVar() string {
