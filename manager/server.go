@@ -35,6 +35,7 @@ func (this *Server) AddFriend(friend *database.Friend) bool {
 		return false
 	}
 	this.Friends[friend.Name] = friend
+	go ListenToFriend(friend)
 	return true
 }
 
@@ -68,14 +69,18 @@ func ListenToFriend(frnd *database.Friend) {
 		if conn == nil {
 			break
 		}
-		ReceiveAndProcess(conn)
+		go ReceiveAndProcess(conn)
 	}
 }
 
 func ReceiveAndProcess(c *Conn) {
 	from := c.Friend
 	if !LocalServer.HasFriend(from.Name) {
-		log.Stdout("connection refused from", from.Name, "at", from.Hostname)
+		log.Stderr("connection refused from", from.Name, "at", from.Hostname)
+	}
+	frnd := LocalServer.Friends[from.Name]
+	if frnd == nil ||  frnd.TempHashKey != c.HashKey{
+		log.Stderr("connection refused from", from.Name, "at", from.Hostname)
 	}
 	switch c.Type {
 	case MESSAGE:
@@ -134,7 +139,6 @@ func StartBroadcast() {
 
 func StartListener() {
 	for {
-		time.Sleep(util.BCAST_INTERVAL)
 		data := make([]byte, util.BUFFER_SIZE)
 		_, _, err := LocalServer.Server.ReadFrom(data)
 		if err != nil {
@@ -161,8 +165,8 @@ func StartListener() {
 		}
 	}
 }
-
-func init() {
+//TODO after finishing, change to init
+func Init() {
 	l, err := net.ListenPacket("udp", ":"+util.LISTEN_PORT)
 	if err != nil {
 		log.Exit(err)
