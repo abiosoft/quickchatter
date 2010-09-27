@@ -2,10 +2,10 @@ package manager
 
 import (
 	"net"
-	"quickchat/database"
-	"quickchat/util"
+	"quickchatter/database"
+	"quickchatter/util"
 	"log"
-	"quickchat/crypt"
+	"quickchatter/crypt"
 	"strings"
 	"netchan"
 	"strconv"
@@ -79,7 +79,7 @@ func ReceiveAndProcess(c *Conn) {
 		log.Stderr("connection refused from", from.Name, "at", from.Hostname)
 	}
 	frnd := LocalServer.Friends[from.Name]
-	if frnd == nil ||  frnd.TempHashKey != c.HashKey{
+	if frnd == nil || frnd.TempHashKey != c.HashKey {
 		log.Stderr("connection refused from", from.Name, "at", from.Hostname)
 	}
 	switch c.Type {

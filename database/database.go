@@ -2,7 +2,7 @@ package database
 
 import (
 	"os"
-	"quickchat/util"
+	"quickchatter/util"
 	"path"
 	proto "goprotobuf.googlecode.com/hg/proto"
 	"io/ioutil"

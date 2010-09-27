@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc
 
-TARG=quickchat/util
+TARG=quickchatter/util
 GOFILES=\
 	constants.go\
 

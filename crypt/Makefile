@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc
 
-TARG=quickchat/crypt
+TARG=quickchatter/crypt
 GOFILES=\
 	crypt.go\
 

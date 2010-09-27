@@ -1,3 +1,3 @@
 #!/bin/bash
 ./clean
-cd crypt && make install && cd ../util && make install && cd ../database && make install && cd ../manager && make install
+cd crypt && gomake install && cd ../util && gomake install && cd ../database && gomake install && cd ../manager && gomake install

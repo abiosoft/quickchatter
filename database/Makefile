@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc
 
-TARG=quickchat/database
+TARG=quickchatter/database
 GOFILES=\
 	database.go\
 	settings.pb.go\

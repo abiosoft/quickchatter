@@ -2,7 +2,7 @@ package database
 
 import (
 	"testing"
-	"quickchat/crypt"
+	"quickchatter/crypt"
 )
 
 func TestProfile(t *testing.T) {

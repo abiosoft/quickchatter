@@ -1,11 +1,11 @@
 package manager
 
 import (
-	"quickchat/database"
+	"quickchatter/database"
 	"net"
 	"http"
 	"os"
-	"quickchat/crypt"
+	"quickchatter/crypt"
 	"log"
 	"strconv"
 	"strings"

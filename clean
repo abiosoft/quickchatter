@@ -1,3 +1,3 @@
 #!/bin/bash
 
-cd crypt && make clean && cd ../database && make clean && cd ../manager && make clean && cd ../util && make clean
+cd crypt && gomake clean && cd ../database && gomake clean && cd ../manager && gomake clean && cd ../util && gomake clean

@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc
 
-TARG=quickchat/manager
+TARG=quickchatter/manager
 GOFILES=\
 	manager.go\
 	server.go\
